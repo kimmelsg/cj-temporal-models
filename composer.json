@@ -1,0 +1,34 @@
+{
+    "name": "navjobs/temporal",
+    "description": "Easily create Temporal Models with Laravel.",
+    "keywords": [
+        "laravel",
+        "temporal",
+        "trait"
+    ],
+    "homepage": "https://navjobs.com",
+    "license": "MIT",
+    "require": {
+        "php" : ">=5.5.0",
+        "illuminate/database": "^5.1",
+        "illuminate/events": "^5.1"
+    },
+    "require-dev": {
+        "phpunit/phpunit" : "^4.0",
+        "mockery/mockery": "^0.9.4",
+        "satooshi/php-coveralls": "1.*"
+    },
+    "autoload": {
+        "psr-4": {
+            "NavJobs\\Temporal\\": "src"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "NavJobs\\Temporal\\Test\\": "tests"
+        }
+    },
+    "scripts": {
+        "test": "phpunit"
+    }
+}
