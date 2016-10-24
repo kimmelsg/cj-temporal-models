@@ -13,7 +13,8 @@ class TemporalTest extends \NavJobs\Temporal\Test\TestCase
 {
     public function setUp()
     {
-        $db = new DB;
+        parent::setUp();
+        $db = new DB();
 
         $db->addConnection([
             'driver'    => 'sqlite',
@@ -21,10 +22,11 @@ class TemporalTest extends \NavJobs\Temporal\Test\TestCase
         ]);
 
         $db->setEventDispatcher(new Dispatcher(new Container()));
-        $db->bootEloquent();
         $db->setAsGlobal();
+        $db->bootEloquent();
 
         $this->createSchema();
+        $this->resetListeners();
     }
 
     /**
@@ -45,6 +47,15 @@ class TemporalTest extends \NavJobs\Temporal\Test\TestCase
     }
 
     /**
+     * Address a testing issue where model listeners are not reset.
+     */
+    public function resetListeners()
+    {
+        TemporalTestCommission::flushEventListeners();
+        TemporalTestCommission::registerEvents();
+    }
+
+    /**
      * Tear down the database schema.
      *
      * @return void
@@ -52,7 +63,6 @@ class TemporalTest extends \NavJobs\Temporal\Test\TestCase
     public function tearDown()
     {
         $this->schema()->drop('commissions');
-        TemporalTestCommission::clearBootedModels();
     }
 
     /**
@@ -107,17 +117,19 @@ class TemporalTest extends \NavJobs\Temporal\Test\TestCase
     /**
      * Tests...
      */
-    public function testSoftDeletesAreNotRetrieved()
+    public function testItEndsTheCurrentCommissionIfANewOneIsCreatedThatOverlaps()
     {
         $this->createCommissions();
 
-        $commissions = TemporalTestCommission::all();
+        $currentCommission = TemporalTestCommission::find(1);
+        $newCommission = TemporalTestCommission::create([
+            'id' => 2,
+            'agent_id' => 1,
+            'valid_start' => Carbon::now(),
+            'valid_end' => null
+        ]);
 
-//        $users = SoftDeletesTestUser::all();
-//
-//        $this->assertCount(1, $users);
-//        $this->assertEquals(2, $users->first()->id);
-//        $this->assertNull(SoftDeletesTestUser::find(1));
+        $this->assertEquals($newCommission->valid_start, $currentCommission->fresh()->valid_end);
     }
 
     /**
@@ -132,6 +144,7 @@ class TemporalTest extends \NavJobs\Temporal\Test\TestCase
             'valid_start' => Carbon::now()->subDays(10),
             'valid_end' => null
         ]);
+        TemporalTestCommission::registerEvents();
     }
 
     /**
