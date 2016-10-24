@@ -211,6 +211,13 @@ class TemporalTest extends TestCase
         $commission = $commission->fresh();
 
         $this->assertEquals($expectedEnd->toDateString(), $commission->valid_end->toDateString());
+
+        //But it will not save if the valid end is in the past.
+        $commission->valid_end = Carbon::now()->subDay();
+        $commission->save();
+        $commission = $commission->fresh();
+
+        $this->assertEquals($expectedEnd->toDateString(), $commission->valid_end->toDateString());
     }
 
     /**
