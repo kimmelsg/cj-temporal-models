@@ -9,7 +9,7 @@
     "homepage": "https://navjobs.com",
     "license": "MIT",
     "require": {
-        "php" : ">=5.5.0",
+        "php" : ">=7.0.0",
         "illuminate/database": "^5.1",
         "illuminate/events": "^5.1"
     },
