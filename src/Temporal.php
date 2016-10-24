@@ -25,11 +25,11 @@ trait Temporal
         static::creating(function ($item) {
             $item->startCannotBeInThePast();
             $item->endCurrent();
-            $item->removeScheduled();
         });
 
         static::saving(function ($item) {
             $item->startCannotBeAfterEnd();
+            $item->removeSchedulingConflicts();
         });
 
         static::updating(function ($item) {
@@ -86,9 +86,13 @@ trait Temporal
      * If a temporal model is created, then we want any Temporal Models that were
      * already scheduled to start to be removed.
      */
-    protected function removeScheduled()
+    protected function removeSchedulingConflicts()
     {
-        $this->getQuery()->where('valid_start', '>', new Carbon())->delete();
+        if (is_null($this->valid_end)) {
+            return $this->getQuery()->where('valid_start', '>', Carbon::now())->delete();
+        }
+
+        $this->getQuery()->where('valid_start', '>', $this->valid_end)->delete();
     }
 
     /**
