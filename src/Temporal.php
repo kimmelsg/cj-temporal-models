@@ -8,6 +8,13 @@ use NavJobs\Temporal\Exceptions\InvalidDateRangeException;
 trait Temporal
 {
     /**
+     * Determines if updating is allowed. Defaults to false.
+     *
+     * @var bool
+     */
+    public $allowUpdating = false;
+
+    /**
      * Boot the temporal trait for a model.
      *
      * @return void
@@ -33,7 +40,7 @@ trait Temporal
         });
 
         static::updating(function ($item) {
-            return $item->preventUpdating();
+            return $item->allowUpdating();
         });
 
         static::deleting(function ($item) {
@@ -145,8 +152,12 @@ trait Temporal
      * Dirty attributes must only contain valid_end
      *
      */
-    protected function preventUpdating()
+    protected function allowUpdating()
     {
+        if ($this->allowUpdating) {
+            return $this->allowUpdating;
+        }
+
         $truthChecks = collect([
             $this->getOriginal('valid_end') > Carbon::now() || is_null($this->getOriginal('valid_end')),
             array_key_exists('valid_end', $this->getDirty()),
