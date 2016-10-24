@@ -55,19 +55,25 @@ trait Temporal
     }
 
     /**
-     * Make sure the dates are valid.
-     * Start date cannot be greater than end date.
-     * Start date cannot be in the past.
+     * Valid date cannot be in the past.
      *
      * @throws InvalidDateRangeException
      */
-    protected function validateDates()
+    protected function startCannotBeInThePast()
     {
-        if ($this->valid_end && $this->valid_start > $this->valid_end) {
+        if ($this->valid_start < new Carbon()) {
             throw new InvalidDateRangeException;
         }
+    }
 
-        if ($this->valid_start < new Carbon()) {
+    /**
+     * Start date cannot be greater than end date.
+     *
+     * @throws InvalidDateRangeException
+     */
+    protected function startCannotBeAfterEnd()
+    {
+        if ($this->valid_end && $this->valid_start > $this->valid_end) {
             throw new InvalidDateRangeException;
         }
     }
