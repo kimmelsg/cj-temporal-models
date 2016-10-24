@@ -14,17 +14,22 @@ trait Temporal
      */
     public static function bootTemporal()
     {
-        static::saving(function ($item) {
-            $item->validateDates();
-        });
+        static::registerEvents();
+    }
 
+    /**
+     * Register the events for a Temporal Model.
+     */
+    public static function registerEvents()
+    {
         static::creating(function ($item) {
+            $item->startCannotBeInThePast();
             $item->endCurrent();
             $item->removeScheduled();
         });
 
-        static::updating(function ($item) {
-            return false;
+        static::saving(function ($item) {
+            $item->startCannotBeAfterEnd();
         });
 
         static::deleting(function ($item) {
