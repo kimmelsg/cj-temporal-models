@@ -32,6 +32,10 @@ trait Temporal
             $item->startCannotBeAfterEnd();
         });
 
+        static::updating(function ($item) {
+            return $item->preventUpdating();
+        });
+
         static::deleting(function ($item) {
             return $item->endOrDelete();
         });
@@ -129,6 +133,14 @@ trait Temporal
     }
 
     /**
+     * Only the valid_end attribute is eligible to be updated.
+     */
+    protected function preventUpdating()
+    {
+        return array_key_exists('valid_end', $this->getDirty()) && count($this->getDirty()) == 1;
+    }
+
+    /**
      * Only delete the Temporal model if valid_start is in the future, otherwise set the valid_end.
      *
      * @return bool|null
@@ -136,7 +148,6 @@ trait Temporal
     protected function endOrDelete()
     {
         if ($this->valid_start > Carbon::now()) {
-            $this->delete();
             return true;
         }
 
