@@ -234,6 +234,7 @@ class TemporalTest extends TestCase
         $this->assertEquals(Carbon::now()->addYear()->toDateString(), $commission->valid_start->toDateString());
 
         $commission->agent_id = 30;
+        $commission->allowUpdating = true;
         $commission->save();
         $commission = $commission->fresh();
 
