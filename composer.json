@@ -1,5 +1,5 @@
 {
-    "name": "navjobs/temporal",
+    "name": "navjobs/temporal-models",
     "description": "Easily create Temporal Models with Laravel.",
     "keywords": [
         "laravel",
