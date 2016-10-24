@@ -138,10 +138,23 @@ trait Temporal
 
     /**
      * Only the valid_end attribute is eligible to be updated.
+     *
+     * Must be valid
+     * Must have valid_end in the dirty attributes
+     * The new valid end must in the future (or null)
+     * Dirty attributes must only contain valid_end
+     *
      */
     protected function preventUpdating()
     {
-        return array_key_exists('valid_end', $this->getDirty()) && count($this->getDirty()) == 1;
+        $truthChecks = collect([
+            $this->getOriginal('valid_end') > Carbon::now() || is_null($this->getOriginal('valid_end')),
+            array_key_exists('valid_end', $this->getDirty()),
+            $this->valid_end >= Carbon::now()->subSeconds(5) || is_null($this->valid_end),
+            count($this->getDirty()) == 1,
+        ]);
+
+        return $truthChecks->filter()->count() === $truthChecks->count();
     }
 
     /**
