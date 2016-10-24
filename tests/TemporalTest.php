@@ -1,15 +1,16 @@
 <?php
 
 use Carbon\Carbon;
+use NavJobs\Temporal\Temporal;
+use Illuminate\Events\Dispatcher;
 use Illuminate\Container\Container;
+use NavJobs\Temporal\Test\TestCase;
 use Illuminate\Database\Connection;
 use Illuminate\Database\Capsule\Manager as DB;
 use Illuminate\Database\Eloquent\Model as Eloquent;
-use Illuminate\Events\Dispatcher;
 use NavJobs\Temporal\Exceptions\InvalidDateRangeException;
-use NavJobs\Temporal\Temporal;
 
-class TemporalTest extends \NavJobs\Temporal\Test\TestCase
+class TemporalTest extends TestCase
 {
     public function setUp()
     {
@@ -44,6 +45,16 @@ class TemporalTest extends \NavJobs\Temporal\Test\TestCase
             $table->timestamps();
             $table->softDeletes();
         });
+
+        $this->schema()->create('polymorphic_commissions', function ($table) {
+            $table->increments('id');
+            $table->integer('agent_id')->unsigned();
+            $table->string('agent_type');
+            $table->dateTime('valid_start');
+            $table->dateTime('valid_end')->nullable();
+            $table->timestamps();
+            $table->softDeletes();
+        });
     }
 
     /**
@@ -63,6 +74,7 @@ class TemporalTest extends \NavJobs\Temporal\Test\TestCase
     public function tearDown()
     {
         $this->schema()->drop('commissions');
+        $this->schema()->drop('polymorphic_commissions');
     }
 
     /**
@@ -119,9 +131,8 @@ class TemporalTest extends \NavJobs\Temporal\Test\TestCase
      */
     public function testItEndsTheCurrentCommissionIfANewOneIsCreatedThatOverlaps()
     {
-        $this->createCommissions();
+        $currentCommission = $this->createCommission();
 
-        $currentCommission = TemporalTestCommission::find(1);
         $newCommission = TemporalTestCommission::create([
             'id' => 2,
             'agent_id' => 1,
@@ -133,18 +144,137 @@ class TemporalTest extends \NavJobs\Temporal\Test\TestCase
     }
 
     /**
+     * Tests...
+     */
+    public function testItRemovesAScheduledCommissionWhenANewOneIsCreated()
+    {
+        $scheduledCommission = TemporalTestCommission::create([
+            'id' => 2,
+            'agent_id' => 1,
+            'valid_start' => Carbon::now()->addDay(),
+            'valid_end' => null
+        ]);
+        TemporalTestCommission::create([
+            'id' => 3,
+            'agent_id' => 1,
+            'valid_start' => Carbon::now(),
+            'valid_end' => null
+        ]);
+
+        $this->assertNull($scheduledCommission->fresh());
+    }
+
+    /**
+     * Tests...
+     */
+    public function testItRemovesAScheduledPolymorphicCommissionWhenANewOneIsCreated()
+    {
+        $scheduledCommission = PolymorphicTemporalTestCommission::create([
+            'id' => 2,
+            'agent_id' => 1,
+            'agent_type' => 'NavJobs\Temporal\Agent',
+            'valid_start' => Carbon::now()->addDay(),
+            'valid_end' => null
+        ]);
+        PolymorphicTemporalTestCommission::create([
+            'id' => 3,
+            'agent_id' => 1,
+            'agent_type' => 'NavJobs\Temporal\Agent',
+            'valid_start' => Carbon::now(),
+            'valid_end' => null
+        ]);
+
+        $this->assertNull($scheduledCommission->fresh());
+    }
+
+    /**
+     * Tests...
+     */
+    public function testItOnlyAllowsValidEndToBeUpdated()
+    {
+        $commission = $this->createCommission();
+        $commission->valid_start = Carbon::now()->addYear();
+        $commission->save();
+        $commission = $commission->fresh();
+
+        $this->assertEquals(Carbon::now()->subDays(10)->toDateString(), $commission->valid_start->toDateString());
+
+        $commission->agent_id = 30;
+        $commission->save();
+        $commission = $commission->fresh();
+
+        $this->assertEquals(1, $commission->agent_id);
+
+        $expectedEnd = Carbon::now()->addDay(10);
+        $commission->valid_end = $expectedEnd;
+        $commission->save();
+        $commission = $commission->fresh();
+
+        $this->assertEquals($expectedEnd->toDateString(), $commission->valid_end->toDateString());
+    }
+
+    /**
+     * Tests...
+     */
+    public function testItOnlyEndsACommissionInsteadOfDeletingWhenItHasAlreadyStarted()
+    {
+        $commission = $this->createCommission();
+        $commission->delete();
+        $commission = $commission->fresh();
+
+        $this->assertEquals(Carbon::now()->toDateString(), $commission->valid_end->toDateString());
+    }
+
+    /**
+     * Tests...
+     */
+    public function testItDeletesACommissionCompletelyIfItHasNotStartedYet()
+    {
+        $commission = TemporalTestCommission::create([
+            'id' => 3,
+            'agent_id' => 1,
+            'valid_start' => Carbon::now()->addYear(),
+            'valid_end' => null
+        ]);
+        $commission->delete();
+        $commission = $commission->fresh();
+
+        $this->assertNull($commission);
+    }
+
+    /**
      * Helpers...
      */
-    protected function createCommissions()
+    protected function createCommission()
     {
         TemporalTestCommission::flushEventListeners();
-        TemporalTestCommission::create([
+        $commission = TemporalTestCommission::create([
             'id' => 1,
             'agent_id' => 1,
             'valid_start' => Carbon::now()->subDays(10),
             'valid_end' => null
         ]);
         TemporalTestCommission::registerEvents();
+
+        return $commission;
+    }
+
+    /**
+     * Helpers...
+     */
+    protected function createPolymorphicCommission()
+    {
+        TemporalTestCommission::flushEventListeners();
+        $commission = TemporalTestCommission::create([
+            'id' => 1,
+            'agent_id' => 1,
+            'agent_type' => 'NavJobs\Temporal\Agent',
+            'valid_start' => Carbon::now()->subDays(10),
+            'valid_end' => null
+        ]);
+        TemporalTestCommission::registerEvents();
+
+        return $commission;
     }
 
     /**
@@ -175,8 +305,22 @@ class TemporalTestCommission extends Eloquent
 {
     use Temporal;
 
-    protected $dates = ['deleted_at'];
+    protected $dates = ['valid_start', 'valid_end', 'deleted_at'];
     protected $table = 'commissions';
     protected $guarded = [];
     protected $temporalParentColumn = 'agent_id';
+}
+
+/**
+ * Eloquent Models...
+ */
+class PolymorphicTemporalTestCommission extends Eloquent
+{
+    use Temporal;
+
+    protected $dates = ['valid_start', 'valid_end', 'deleted_at'];
+    protected $table = 'polymorphic_commissions';
+    protected $guarded = [];
+    protected $temporalParentColumn = 'agent_id';
+    protected $temporalPolymorphicTypeColumn = 'agent_type';
 }
