@@ -45,14 +45,14 @@ class TemporalModel extends Model
 ```
 
 The $temporalParentColumn is the field name of the column that ties the Temporal Models together. For example, if the
-Model is a commission rate then the $temporalParentColumn might 'representative_id'.
+model is a commission rate then the $temporalParentColumn might 'representative_id'.
 
 ## Usage
 
 ###### Creating Temporal Models
-When a Temporal Model is created it automatically resolves any scheduling conflicts. If the created Model overlaps with
-a scheduled Model then the scheduled model will be removed. Any already started Models will have their
-valid_end set to the valid_start of the Model that is being created. Temporal Models cannot be created in the
+When a Temporal Model is created it automatically resolves any scheduling conflicts. If the created model overlaps with
+a scheduled model then the scheduled model will be removed. Any already started models will have their
+valid_end set to the valid_start of the model that is being created. Temporal Models cannot be created in the
 past.
 
 ###### Updating Temporal Models
@@ -68,11 +68,11 @@ Additionally the behavior can be changed dynamically by setting $model->allowUpd
 
 ###### Deleting Temporal Models
 Temporal Models that have already started cannot be deleted. When the delete method is called on them they will simply
-have their valid_end set to now. If delete is called on a scheduled Model then it will succeed.
+have their valid_end set to now. If delete is called on a scheduled model then it will succeed.
 
 ###### Methods and Scopes
 The Temporal trait includes an isValid() method that optionally takes a Carbon object. The method returns whether the
-Model was valid on the provided date or now if no Carbon object is provided. Also included are a valid() and invalid()
+model was valid on the provided date or now if no Carbon object is provided. Also included are a valid() and invalid()
 scope. These scopes query for either the valid or invalid scopes at the time of the passed Carbon object or now if no
 Carbon object is passed.
 
