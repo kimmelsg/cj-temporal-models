@@ -44,6 +44,9 @@ class TemporalModel extends Model
 }
 ```
 
+The $temporalParentColumn is the field name of the column that ties the Temporal Models together. For example, if the
+Model is a commission rate then the $temporalParentColumn might 'representative_id'.
+
 ## Usage
 
 ###### Creating Temporal Models
