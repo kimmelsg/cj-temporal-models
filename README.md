@@ -56,7 +56,7 @@ valid_end set to the valid_start of the model that is being created. Temporal Mo
 past.
 
 ###### Updating Temporal Models
-In order to preserve their historic nature updates to Temporal Models are restricted to just valid_end after
+In order to preserve their historic nature, updates to Temporal Models are restricted to just valid_end after
 they have started. Attempting to update any other fields will cause the update to not be persisted to the database.
 If this behavior is not desired then it can be modified by adding the following public property to the Temporal Model:
 
