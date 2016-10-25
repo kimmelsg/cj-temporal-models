@@ -72,7 +72,7 @@ trait Temporal
      */
     protected function startCannotBeInThePast()
     {
-        if ($this->valid_start < new Carbon()) {
+        if ($this->valid_start < Carbon::now()->subSeconds(5)) {
             throw new InvalidDateRangeException;
         }
     }
