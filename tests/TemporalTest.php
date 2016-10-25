@@ -226,16 +226,14 @@ class TemporalTest extends TestCase
     public function testItCanUpdateIfTheUserHasSpecifiedToAllowUpdates()
     {
         $commission = $this->createCommission();
-        $commission->allowUpdating = true;
         $commission->valid_start = Carbon::now()->addYear();
-        $commission->save();
+        $commission->enableUpdates()->save();
         $commission = $commission->fresh();
 
         $this->assertEquals(Carbon::now()->addYear()->toDateString(), $commission->valid_start->toDateString());
 
         $commission->agent_id = 30;
-        $commission->allowUpdating = true;
-        $commission->save();
+        $commission->enableUpdates()->save();
         $commission = $commission->fresh();
 
         $this->assertEquals(30, $commission->agent_id);
