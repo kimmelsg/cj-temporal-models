@@ -54,7 +54,7 @@ When a temporal record is created it automatically resolves any scheduling confl
 
 ###### Updating Temporal Records
 In order to preserve their historic nature, updates to temporal records are restricted to just valid_end after
-they have started. Attempts to update any other fields will fail. If this behavior is undesirable, it can be modified by adding the following public property to the temporal model:
+they have started. Attempts to update any other fields will fail. If this behavior is undesirable, it can be modified by adding the following property to the temporal model:
 
 ```php
 protected $enableUpdates = true;
