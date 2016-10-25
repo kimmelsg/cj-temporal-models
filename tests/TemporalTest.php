@@ -226,16 +226,14 @@ class TemporalTest extends TestCase
     public function testItCanUpdateIfTheUserHasSpecifiedToAllowUpdates()
     {
         $commission = $this->createCommission();
-        $commission->allowUpdating = true;
         $commission->valid_start = Carbon::now()->addYear();
-        $commission->save();
+        $commission->enableUpdates()->save();
         $commission = $commission->fresh();
 
         $this->assertEquals(Carbon::now()->addYear()->toDateString(), $commission->valid_start->toDateString());
 
         $commission->agent_id = 30;
-        $commission->allowUpdating = true;
-        $commission->save();
+        $commission->enableUpdates()->save();
         $commission = $commission->fresh();
 
         $this->assertEquals(30, $commission->agent_id);
@@ -268,6 +266,72 @@ class TemporalTest extends TestCase
         $commission = $commission->fresh();
 
         $this->assertNull($commission);
+    }
+
+    /**
+     * Tests...
+     */
+    public function testItReceivesValidResultsFromValidScope()
+    {
+        TemporalTestCommission::flushEventListeners();
+        collect([
+            [
+                'id' => 5,
+                'agent_id' => 1,
+                'valid_start' => Carbon::now()->subYear(),
+                'valid_end' => Carbon::now(),
+            ],
+            [
+                'id' => 6,
+                'agent_id' => 1,
+                'valid_start' => Carbon::now(),
+                'valid_end' => Carbon::now()->addYear(),
+            ],
+            [
+                'id' => 7,
+                'agent_id' => 1,
+                'valid_start' => Carbon::now()->addYear(),
+                'valid_end' => null,
+            ],
+        ])->each(function ($commission) {
+            TemporalTestCommission::create($commission);
+        });
+        TemporalTestCommission::registerEvents();
+
+        $this->assertEquals(6, TemporalTestCommission::valid()->first()->id);
+    }
+
+    /**
+     * Tests...
+     */
+    public function testItReceivesInvalidResultsFromInvalidScope()
+    {
+        TemporalTestCommission::flushEventListeners();
+        collect([
+            [
+                'id' => 5,
+                'agent_id' => 1,
+                'valid_start' => Carbon::now()->subYear(),
+                'valid_end' => Carbon::now()->subMinute(),
+            ],
+            [
+                'id' => 6,
+                'agent_id' => 1,
+                'valid_start' => Carbon::now(),
+                'valid_end' => Carbon::now()->addYear(),
+            ],
+            [
+                'id' => 7,
+                'agent_id' => 1,
+                'valid_start' => Carbon::now()->addYear(),
+                'valid_end' => null,
+            ],
+        ])->each(function ($commission) {
+            TemporalTestCommission::create($commission);
+        });
+        TemporalTestCommission::registerEvents();
+
+        $this->assertEquals([5, 7], TemporalTestCommission::invalid()->pluck('id')->toArray());
     }
 
     /**

@@ -12,7 +12,7 @@ trait Temporal
      *
      * @var bool
      */
-    public $allowUpdating = false;
+    protected $enableUpdates = false;
 
     /**
      * Boot the temporal trait for a model.
@@ -40,7 +40,7 @@ trait Temporal
         });
 
         static::updating(function ($item) {
-            return $item->allowUpdating();
+            return $item->canUpdate();
         });
 
         static::deleting(function ($item) {
@@ -152,10 +152,10 @@ trait Temporal
      * Dirty attributes must only contain valid_end
      *
      */
-    protected function allowUpdating()
+    protected function canUpdate()
     {
-        if ($this->allowUpdating) {
-            return $this->allowUpdating;
+        if ($this->enableUpdates) {
+            return $this->enableUpdates;
         }
 
         $truthChecks = collect([
@@ -186,6 +186,19 @@ trait Temporal
         }
 
         return false;
+    }
+
+    /**
+     * Sets the enableUpdates property in a chainable manner.
+     *
+     * @param bool $status
+     * @return $this
+     */
+    public function enableUpdates($status = true)
+    {
+        $this->enableUpdates = $status;
+
+        return $this;
     }
 
     /********************************************************************************
