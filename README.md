@@ -48,8 +48,8 @@ class TemporalModel extends Model
 
 ###### Creating Temporal Models
 When a Temporal Model is created it automatically resolves any scheduling conflicts. If the created Model overlaps with
-a scheduled Model then the scheduled model will be removed. Any already started Temporal Models will have their
-valid_end set to the valid_start of the Temporal Model that is being created. Temporal Models cannot be created in the
+a scheduled Model then the scheduled model will be removed. Any already started Models will have their
+valid_end set to the valid_start of the Model that is being created. Temporal Models cannot be created in the
 past.
 
 ###### Updating Temporal Models
