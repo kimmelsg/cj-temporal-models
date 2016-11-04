@@ -1,5 +1,6 @@
 [![Circle CI](https://circleci.com/gh/navjobs/temporal-models.svg?style=shield)](https://circleci.com/gh/navjobs/temporal-models)
 [![Coverage Status](https://coveralls.io/repos/github/navjobs/temporal-models/badge.svg?branch=master)](https://coveralls.io/github/navjobs/temporal-models?branch=master)
+[![Code Climate](https://codeclimate.com/github/navjobs/temporal-models/badges/gpa.svg)](https://codeclimate.com/github/navjobs/temporal-models)
 
 ###### Temporal Models for Laravel
 Adds support for Temporal Models to Laravel 5.1+
