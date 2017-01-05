@@ -207,7 +207,7 @@ trait Temporal
         }
 
         if ($this->isValid()) {
-            $this->update([
+            $this->where($this->primaryKey, $this->{$this->primaryKey})->update([
                 'valid_end' => Carbon::now()
             ]);
         }
