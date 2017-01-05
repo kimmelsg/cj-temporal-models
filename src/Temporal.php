@@ -96,16 +96,33 @@ trait Temporal
     protected function removeSchedulingConflicts()
     {
         if (is_null($this->valid_end)) {
-            return $this->getQuery()->where('valid_start', '>', Carbon::now())->delete();
+            $conflicts = $this->getQuery()->where('valid_start', '>', Carbon::now())->get();
+            $this->deleteTemporals($conflicts);
+            return;
         }
 
-        $this->getQuery()
+        $conflicts = $this->getQuery()
             ->where('valid_start', '<', $this->valid_end)
             ->where(function ($query) {
                 $query->whereNull('valid_end')
                     ->orWhere('valid_end', '>', $this->valid_start);
             })
-            ->delete();
+            ->get();
+
+        $this->deleteTemporals($conflicts);
+    }
+
+    /**
+     * Deletes the provided temporal objects.  Delete is called on the object
+     * itself so that the observers will be called properly.
+     *
+     * @param $temporals
+     */
+    protected function deleteTemporals($temporals)
+    {
+        collect($temporals)->each(function($temporal) {
+            $temporal->delete();
+        });
     }
 
     /**
