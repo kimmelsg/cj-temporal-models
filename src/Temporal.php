@@ -99,7 +99,13 @@ trait Temporal
             return $this->getQuery()->where('valid_start', '>', Carbon::now())->delete();
         }
 
-        $this->getQuery()->where('valid_start', '>', $this->valid_end)->delete();
+        $this->getQuery()
+            ->where('valid_start', '<', $this->valid_end)
+            ->where(function ($query) {
+                $query->whereNull('valid_end')
+                    ->orWhere('valid_end', '>', $this->valid_start);
+            })
+            ->delete();
     }
 
     /**
@@ -123,7 +129,9 @@ trait Temporal
      */
     private function getQuery()
     {
-        $query = $this->where($this->temporalParentColumn, $this->{$this->temporalParentColumn});
+        $query = $this
+            ->where($this->primaryKey, '!=', $this->{$this->primaryKey})
+            ->where($this->temporalParentColumn, $this->{$this->temporalParentColumn});
 
         if ($this->temporalPolymorphicTypeColumn) {
             $query->where($this->temporalPolymorphicTypeColumn, $this->{$this->temporalPolymorphicTypeColumn});
