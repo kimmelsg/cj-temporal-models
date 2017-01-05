@@ -129,9 +129,11 @@ trait Temporal
      */
     private function getQuery()
     {
-        $query = $this
-            ->where($this->primaryKey, '!=', $this->{$this->primaryKey})
-            ->where($this->temporalParentColumn, $this->{$this->temporalParentColumn});
+        $query = $this->where($this->temporalParentColumn, $this->{$this->temporalParentColumn});
+
+        if ($this->{$this->primaryKey}) {
+            $query->where($this->primaryKey, '!=', $this->{$this->primaryKey});
+        }
 
         if ($this->temporalPolymorphicTypeColumn) {
             $query->where($this->temporalPolymorphicTypeColumn, $this->{$this->temporalPolymorphicTypeColumn});
