@@ -188,6 +188,27 @@ class TemporalTest extends TestCase
     /**
      * Tests...
      */
+    public function testItCorrectlySetsTheValidEndOfTheCurrentWhenThereIsASchedulingConflict()
+    {
+        $currentCommission = TemporalTestCommission::create([
+            'id' => 3,
+            'agent_id' => 1,
+            'valid_start' => Carbon::now(),
+            'valid_end' => Carbon::now()->addDays(20)
+        ]);
+        TemporalTestCommission::create([
+            'id' => 2,
+            'agent_id' => 1,
+            'valid_start' => Carbon::now()->addDays(15),
+            'valid_end' => null
+        ]);
+
+        $this->assertEquals(Carbon::now()->addDays(15), $currentCommission->fresh()->valid_end);
+    }
+
+    /**
+     * Tests...
+     */
     public function testItRemovesAScheduledPolymorphicCommissionWhenANewOneIsCreated()
     {
         $scheduledCommission = PolymorphicTemporalTestCommission::create([
