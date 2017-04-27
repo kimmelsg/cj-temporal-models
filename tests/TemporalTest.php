@@ -203,7 +203,7 @@ class TemporalTest extends TestCase
             'valid_end' => null
         ]);
 
-        $this->assertEquals(Carbon::now()->addDays(15), $currentCommission->fresh()->valid_end);
+        $this->assertEquals(Carbon::now()->addDays(15)->toDateTimeString(), $currentCommission->fresh()->valid_end);
     }
 
     /**
