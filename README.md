@@ -24,7 +24,7 @@ Adds support for Temporal Models to Laravel 5.1+
 You can install this package via Composer using this command:
 
 ```bash
-composer require navjobs/temporal-model
+composer require navjobs/temporal-models
 ```
 
 Next, the model you wish to make temporal must have the following fields in its Schema:
