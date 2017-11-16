@@ -203,7 +203,10 @@ class TemporalTest extends TestCase
             'valid_end' => null
         ]);
 
-        $this->assertEquals(Carbon::now()->addDays(15), $currentCommission->fresh()->valid_end);
+        $this->assertEquals(
+            Carbon::now()->addDays(15)->toDateString(),
+            $currentCommission->fresh()->valid_end->toDateString()
+        );
     }
 
     /**
@@ -305,6 +308,18 @@ class TemporalTest extends TestCase
             'valid_end' => null
         ]);
         $commission->delete();
+        $commission = $commission->fresh();
+
+        $this->assertNull($commission);
+    }
+
+    /**
+     * Tests...
+     */
+    public function testItCanDeleteIfTheUserHasSpecifiedToAllowUpdates()
+    {
+        $commission = $this->createCommission();
+        $commission->enableUpdates()->delete();
         $commission = $commission->fresh();
 
         $this->assertNull($commission);
