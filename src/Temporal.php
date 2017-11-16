@@ -177,7 +177,7 @@ trait Temporal
             count($this->getDirty()) == 1,
         ]);
 
-        return $truthChecks->filter()->count() === $truthChecks->count();
+        return $truthChecks->filter()->count() === $truthChecks->count() ? null : false;
     }
 
     /**
@@ -187,8 +187,12 @@ trait Temporal
      */
     protected function endOrDelete()
     {
+        if ($this->enableUpdates) {
+            return;
+        }
+
         if ($this->valid_start > Carbon::now()) {
-            return true;
+            return;
         }
 
         if ($this->isValid()) {
