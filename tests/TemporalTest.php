@@ -104,7 +104,7 @@ class TemporalTest extends TestCase
      */
     public function testItCannotSaveWithAStartDateInThePast()
     {
-        $this->setExpectedException(InvalidDateRangeException::class);
+        $this->expectException(InvalidDateRangeException::class);
 
         $stub = new TemporalTestCommission();
         $stub->agent_id = 1;
@@ -117,7 +117,7 @@ class TemporalTest extends TestCase
      */
     public function testItCannotSaveWithAStartDateAfterTheEndDate()
     {
-        $this->setExpectedException(InvalidDateRangeException::class);
+        $this->expectException(InvalidDateRangeException::class);
 
         $stub = new TemporalTestCommission();
         $stub->agent_id = 1;
