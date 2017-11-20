@@ -1,0 +1,122 @@
+version: 2
+jobs:
+  test-7.0-latest:
+    docker:
+      - image: circleci/php:7.0.25-node-browsers
+    steps:
+      - checkout
+      - run:
+          name: Update Composer
+          command: 'composer self-update'
+      - run:
+          name: Validate composer.json
+          command: 'composer validate --strict'
+      - restore_cache:
+          key: dependency-cache-7.0-latest-{{ checksum "composer.json" }}
+      - run:
+          name: Install dependencies
+          command: composer update --prefer-dist --prefer-stable --no-suggest
+      - save_cache:
+          key: dependency-cache-7.0-latest-{{ checksum "composer.json" }}
+          paths:
+            - vendor
+      - run:
+          name: Run test suite
+          command: vendor/bin/phpunit
+      - store_test_results:
+          path: build/logs/clover.xml
+      - run:
+          name: Send coverage to Coveralls
+          command: vendor/bin/coveralls -n
+  test-7.1-latest:
+    docker:
+      - image: circleci/php:7.1.11-node-browsers
+    steps:
+      - checkout
+      - run:
+          name: Update Composer
+          command: 'composer self-update'
+      - run:
+          name: Validate composer.json
+          command: 'composer validate --strict'
+      - restore_cache:
+          key: dependency-cache-7.1-latest-{{ checksum "composer.json" }}
+      - run:
+          name: Install dependencies
+          command: composer update --prefer-dist --prefer-stable --no-suggest
+      - save_cache:
+          key: dependency-cache-7.1-latest-{{ checksum "composer.json" }}
+          paths:
+            - vendor
+      - run:
+          name: Run test suite
+          command: vendor/bin/phpunit
+      - store_test_results:
+          path: build/logs/clover.xml
+      - run:
+          name: Send coverage to Coveralls
+          command: vendor/bin/coveralls -n
+  test-7.0-lowest:
+    docker:
+      - image: circleci/php:7.0.25-node-browsers
+    steps:
+      - checkout
+      - run:
+          name: Update Composer
+          command: 'composer self-update'
+      - run:
+          name: Validate composer.json
+          command: 'composer validate --strict'
+      - restore_cache:
+          key: dependency-cache-7.0-lowest-{{ checksum "composer.json" }}
+      - run:
+          name: Install dependencies
+          command: composer update --prefer-dist --prefer-lowest --prefer-stable --no-suggest
+      - save_cache:
+          key: dependency-cache-7.0-lowest-{{ checksum "composer.json" }}
+          paths:
+            - vendor
+      - run:
+          name: Run test suite
+          command: vendor/bin/phpunit
+      - store_test_results:
+          path: build/logs/clover.xml
+      - run:
+          name: Send coverage to Coveralls
+          command: vendor/bin/coveralls -n
+  test-7.1-lowest:
+    docker:
+      - image: circleci/php:7.1.11-node-browsers
+    steps:
+      - checkout
+      - run:
+          name: Update Composer
+          command: 'composer self-update'
+      - run:
+          name: Validate composer.json
+          command: 'composer validate --strict'
+      - restore_cache:
+          key: dependency-cache-7.1-lowest-{{ checksum "composer.json" }}
+      - run:
+          name: Install dependencies
+          command: composer update --prefer-dist --prefer-lowest --prefer-stable --no-suggest
+      - save_cache:
+          key: dependency-cache-7.1-lowest-{{ checksum "composer.json" }}
+          paths:
+            - vendor
+      - run:
+          name: Run test suite
+          command: vendor/bin/phpunit
+      - store_test_results:
+          path: build/logs/clover.xml
+      - run:
+          name: Send coverage to Coveralls
+          command: vendor/bin/coveralls -n
+workflows:
+  version: 2
+  test:
+    jobs:
+      - test-7.0-latest
+      - test-7.0-lowest
+      - test-7.1-latest
+      - test-7.1-lowest
