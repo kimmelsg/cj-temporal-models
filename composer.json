@@ -10,8 +10,8 @@
     "license": "MIT",
     "require": {
         "php" : ">=7.0.0",
-        "illuminate/database": "^5.1",
-        "illuminate/events": "^5.1"
+        "illuminate/database": "^5.2",
+        "illuminate/events": "^5.2"
     },
     "require-dev": {
         "mockery/mockery": "^0.9.4",
